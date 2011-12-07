@@ -67,12 +67,24 @@ def get_and_parse():
     return list(generate_time_tasks(get_json_data()))
     #return [TimeEvent(x) for x in get_json_data()]
 
-if __name__ == '__main__':
-    #print(events)
-    #print(get_json_data())
-    date = None
-    for task in get_and_parse():
+def summarize():
+    tasks = get_and_parse()
+    if tasks:
+        date = tasks[0].date()
+    else:
+        date = None
+    day_hours = 0.0
+    def print_total():
+        print('Total hours: {0:.1f}'.format(day_hours))
+        print('')
+    for task in tasks:
         if task.date() != date:
-            print('')
+            print_total()
+            day_hours = 0.0
+        day_hours += task.hours()
         print(task.summary())
         date = task.date()
+    print_total()
+
+if __name__ == '__main__':
+    summarize()
