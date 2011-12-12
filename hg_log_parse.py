@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import subprocess, datetime, os
 
@@ -42,14 +42,14 @@ class LogEntry:
     def __str__(self):
         return 'LogEntry(datetime="{0.datetime}", repos="{0.repos_name}", files="{0.files}", desc="{0.desc}")'.format(self)
     
-    def __cmp__(self, other):
-        return cmp(self.datetime, other.datetime)
+    def __lt__(self, other):
+        return self.datetime < other.datetime
 
 def hg(*args):
     cmd = ['hg'] + list(args)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     out, err = p.communicate()
-    return out.strip()
+    return out.decode('utf-8').strip()
 
 def parse_hg_log(repos, user):
     repos_name = hg('showconfig', '-R', repos, 'paths.default')
