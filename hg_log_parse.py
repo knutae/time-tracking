@@ -6,6 +6,7 @@ LOG_TEMPLATE='''---+++---
 date:{date}
 desc:{desc}
 files:{files}
+branch:{branch}
 '''
 
 def parse_raw_date(raw_date):
@@ -30,6 +31,7 @@ class LogEntry:
             fields[key] = value
         self.desc = fields['desc']
         self.files = fields['files']
+        self.branch = fields['branch']
         self.datetime = parse_raw_date(fields['date'])
 
     def date(self):
@@ -40,7 +42,7 @@ class LogEntry:
         return self.datetime.date()
 
     def __str__(self):
-        return 'LogEntry(datetime="{0.datetime}", repos="{0.repos_name}", files="{0.files}", desc="{0.desc}")'.format(self)
+        return 'LogEntry(datetime="{0.datetime}", repos="{0.repos_name}", branch="{0.branch}" files="{0.files}", desc="{0.desc}")'.format(self)
     
     def __lt__(self, other):
         return self.datetime < other.datetime
@@ -149,7 +151,10 @@ def main():
         print('{0:%d.%m.%Y}: {1:2} commits -- {2:4} hours -- {3}'.format(date, len(block), hours, format_categories(block)))
         if opts.verbose:
             for entry in block:
-                print('    {0:%H:%M} {1} ({2})'.format(entry.datetime, entry.desc, entry.repos_name))
+                repo_and_branch = entry.repos_name
+                if entry.branch != 'default':
+                    repo_and_branch += ', ' + entry.branch
+                print('    {0:%H:%M} {1} ({2})'.format(entry.datetime, entry.desc, repo_and_branch))
     print('Total: {0} commits -- {1}'.format(len(r), format_categories(r)))
 
 if __name__ == '__main__':
