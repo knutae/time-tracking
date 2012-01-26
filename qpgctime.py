@@ -3,8 +3,13 @@
 import os, json, datetime
 from http.client import HTTPConnection
 
-# Ex: 2011-11-07T10:20:48.775Z
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+def parse_iso_8601_utc_time(s):
+    for format in ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ']:
+        try:
+            return datetime.datetime.strptime(s, format)
+        except ValueError:
+            pass
+    raise ValueError('Failed to parse time: ' + s)
 
 def get_apikey():
     path = os.path.expanduser('~/.time.qpgc.org.apikey')
@@ -22,7 +27,7 @@ def get_json_data():
 class TimeEvent:
     def __init__(self, data):
         self.status = data['status']
-        self.id = datetime.datetime.strptime(data['id'], DATE_FORMAT)
+        self.id = parse_iso_8601_utc_time(data['id'])
         self.description = data.get('description')
         self.tags = data.get('tags', [])
     
