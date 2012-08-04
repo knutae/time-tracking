@@ -17,12 +17,14 @@ def get_apikey():
         return open(path).read().strip()
     assert False, 'API key file not found: ' + path
 
-def get_json_data():
+def get_raw_data():
     apikey = get_apikey()
     c = HTTPConnection('time.qpgc.org')
     c.request('GET', '/time', headers={'Cookie': 'apikey=' + apikey})
-    rawdata = c.getresponse().read().decode('utf8')
-    return json.loads(rawdata)
+    return c.getresponse().read().decode('utf8')
+
+def get_json_data():
+    return json.loads(get_raw_data())
 
 class TimeEvent:
     def __init__(self, data):
@@ -69,10 +71,11 @@ def generate_time_tasks(data):
             yield TimeTask(e1, e2)
 
 def get_and_parse():
+    #print(get_json_data())
     return list(generate_time_tasks(get_json_data()))
     #return [TimeEvent(x) for x in get_json_data()]
 
-def summarize():
+def summarize(startDate):
     tasks = get_and_parse()
     if tasks:
         date = tasks[0].date()
@@ -83,6 +86,9 @@ def summarize():
         print('Total hours: {0:.1f}'.format(day_hours))
         print('')
     for task in tasks:
+        if task.date() < startDate:
+            date = task.date()
+            continue
         if task.date() != date:
             print_total()
             day_hours = 0.0
@@ -92,4 +98,5 @@ def summarize():
     print_total()
 
 if __name__ == '__main__':
-    summarize()
+    startDate = datetime.date(2012, 2, 1)
+    summarize(startDate)
