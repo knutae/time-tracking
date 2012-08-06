@@ -20,7 +20,7 @@ def get_apikey():
 def get_raw_data():
     apikey = get_apikey()
     c = HTTPConnection('time.qpgc.org')
-    c.request('GET', '/time', headers={'Cookie': 'apikey=' + apikey})
+    c.request('GET', '/time', headers={'apikey': apikey})
     return c.getresponse().read().decode('utf8')
 
 def get_json_data():
@@ -28,8 +28,9 @@ def get_json_data():
 
 class TimeEvent:
     def __init__(self, data):
+        #print('----- ' + str(data))
         self.status = data['status']
-        self.id = parse_iso_8601_utc_time(data['id'])
+        self.id = parse_iso_8601_utc_time(data['_id'])
         self.description = data.get('description')
         self.tags = data.get('tags', [])
     
@@ -65,7 +66,10 @@ class TimeTask:
         return '{1} {2} -- {3} ({4:.1f}h): {0.description} {0.tags}'.format(self, date, start, end, self.hours())
 
 def generate_time_tasks(data):
-    events = [TimeEvent(x) for x in data]
+    events = [TimeEvent(x) for x in data if 'status' in x]
+    #print('Sorting %s events...' % len(events))
+    events.sort(key=lambda x:x.id)
+    #print('Done sorting')
     for e1, e2 in zip(events, events[1:]):
         if e1.status == 'in':
             yield TimeTask(e1, e2)
