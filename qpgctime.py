@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, json, datetime
-from http.client import HTTPConnection
+from http.client import HTTPSConnection
 
 def parse_iso_8601_utc_time(s):
     for format in ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ']:
@@ -19,7 +19,7 @@ def get_apikey():
 
 def get_raw_data():
     apikey = get_apikey()
-    c = HTTPConnection('time.qpgc.org')
+    c = HTTPSConnection('clocked.io')
     c.request('GET', '/time', headers={'apikey': apikey})
     return c.getresponse().read().decode('utf8')
 
