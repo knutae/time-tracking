@@ -4,6 +4,9 @@ import os, json, datetime
 from http.client import HTTPSConnection
 from collections import defaultdict
 
+def utc_to_local(utc_dt):
+    return utc_dt.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
+
 def parse_iso_8601_utc_time(s):
     for format in ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ']:
         try:
@@ -43,8 +46,8 @@ class TimeEvent:
 
 class TimeTask:
     def __init__(self, startEvent, endEvent):
-        self.startTime = startEvent.id
-        self.endTime = endEvent.id
+        self.startTime = utc_to_local(startEvent.id)
+        self.endTime = utc_to_local(endEvent.id)
         self.description = startEvent.description
         self.tags = startEvent.tags
 
