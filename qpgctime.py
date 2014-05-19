@@ -16,7 +16,7 @@ def parse_iso_8601_utc_time(s):
     raise ValueError('Failed to parse time: ' + s)
 
 def get_apikey():
-    path = os.path.expanduser('~/.time.qpgc.org.apikey')
+    path = os.path.expanduser('~/.clocked.io.apikey')
     if os.path.exists(path):
         return open(path).read().strip()
     assert False, 'API key file not found: ' + path
