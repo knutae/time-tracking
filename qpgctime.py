@@ -2,6 +2,7 @@
 
 import os, json, datetime
 from http.client import HTTPSConnection
+from collections import defaultdict
 
 def parse_iso_8601_utc_time(s):
     for format in ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ']:
@@ -86,8 +87,11 @@ def summarize(startDate):
     else:
         date = None
     day_hours = 0.0
+    hours_per_tags = defaultdict(lambda: 0.0)
     def print_total():
-        print('Total hours: {0:.1f}'.format(day_hours))
+        breakdown = ' | '.join('{0}: {1:.1f}'.format(tags, hours)
+                               for tags, hours in sorted(hours_per_tags.items()))
+        print('Total hours: {0:.1f} :: {1}'.format(day_hours, breakdown))
         print('')
     for task in tasks:
         if task.date() < startDate:
@@ -96,11 +100,13 @@ def summarize(startDate):
         if task.date() != date:
             print_total()
             day_hours = 0.0
+            hours_per_tags.clear()
         day_hours += task.hours()
+        hours_per_tags['/'.join(task.tags)] += task.hours()
         print(task.summary())
         date = task.date()
     print_total()
 
 if __name__ == '__main__':
-    startDate = datetime.date(2012, 2, 1)
+    startDate = datetime.date(2014, 1, 1)
     summarize(startDate)
