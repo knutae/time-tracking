@@ -49,10 +49,14 @@ def get_time(args):
     utcnow = datetime.utcnow()
     #print('UTC: ' + str(utcnow))
     if args.time == 'NOW':
+        assert args.date == 'TODAY'
         return utcnow
     x = datetime.strptime(args.time, '%H:%M')
     #print(t.hour)
-    t = datetime.now()
+    if args.date == 'TODAY':
+        t = datetime.now()
+    else:
+        t = datetime.strptime(args.date, '%Y-%m-%d')
     t = t.replace(hour=x.hour, minute=x.minute, second=0, microsecond=0)
     # Convert to UTC in a really ugly way... have not found a better API
     if time.daylight and time.localtime().tm_isdst:
@@ -99,11 +103,15 @@ if __name__ == '__main__':
     cmd_in.add_argument('--message', '-m', type=str, help='Status message (with #hashtags)', required=True)
     cmd_in.add_argument('--time', '-t', type=str, default='NOW',
                         help='clock to use instead of the current time (HH:mm)')
+    cmd_in.add_argument('--date', '-d', type=str, default='TODAY',
+                        help='date to use instead of today (YYYY-MM-dd)')
     cmd_in.set_defaults(func=stamp_in)
     cmd_out = sub.add_parser('out', help='stamp out')
     cmd_out.set_defaults(func=stamp_out)
     cmd_out.add_argument('--time', '-t', type=str, default='NOW',
                          help='clock to use instead of the current time (HH:mm)')
+    cmd_out.add_argument('--date', '-d', type=str, default='TODAY',
+                         help='date to use instead of today (yyyy-mm-dd)')
 
     args = parser.parse_args()
     if args.cmd is None:
