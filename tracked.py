@@ -111,5 +111,5 @@ def summarize(startDate):
     print_total()
 
 if __name__ == '__main__':
-    startDate = datetime.date(2014, 1, 1)
+    startDate = datetime.date(2015, 1, 1)
     summarize(startDate)
