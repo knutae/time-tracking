@@ -94,6 +94,13 @@ def stamp_out(args):
     post(entry)
     print('Stamped OUT at ' + str(time) + ' UTC')
 
+def delete_entry(args):
+    time = get_time(args)
+    path = '/time/' + format_timestamp(time)
+    res = raw_request('DELETE', path)
+    if res.strip():
+        print(res)
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -112,6 +119,12 @@ if __name__ == '__main__':
                          help='clock to use instead of the current time (HH:mm)')
     cmd_out.add_argument('--date', '-d', type=str, default='TODAY',
                          help='date to use instead of today (yyyy-mm-dd)')
+    cmd_delete = sub.add_parser('delete', help='delete entry')
+    cmd_delete.set_defaults(func=delete_entry)
+    cmd_delete.add_argument('--time', '-t', type=str, required=True,
+                            help='time of day (HH:mm)')
+    cmd_delete.add_argument('--date', '-d', type=str, default='TODAY',
+                            help='date to use instead of today (yyyy-mm-dd)')
 
     args = parser.parse_args()
     if args.cmd is None:
