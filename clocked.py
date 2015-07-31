@@ -100,6 +100,7 @@ def delete_entry(args):
     res = raw_request('DELETE', path)
     if res.strip():
         print(res)
+        
 
 if __name__ == '__main__':
     import argparse
