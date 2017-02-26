@@ -112,6 +112,18 @@ def summarize(startDate, endDate):
         date = task.date()
     print_total()
 
+def dump_csv(startDate, endDate):
+    import csv, sys
+    tasks = get_and_parse(startDate, endDate)
+    w = csv.writer(sys.stdout)
+    w.writerow(['Date', 'StartTime', 'EndTime', 'Hours', 'Tags', 'Description'])
+    for task in tasks:
+        date = task.date().strftime('%Y-%m-%d')
+        startTime = task.startTime.strftime('%H:%M')
+        endTime = task.endTime.strftime('%H:%M')
+        hours = '{:.1f}'.format(task.hours())
+        w.writerow([date, startTime, endTime, hours, ' '.join(task.tags), task.description])
+
 def valid_date(s):
     try:
         return datetime.datetime.strptime(s, "%Y-%m-%d").date()
@@ -123,7 +135,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--start-date', '-s', type=valid_date, default='2017-01-01')
     parser.add_argument('--end-date', '-e', type=valid_date, default='2018-01-01')
+    parser.add_argument('--csv', action='store_true')
     args = parser.parse_args()
-    print(args)
+    #print(args)
     #startDate = datetime.date(2017, 1, 1)
-    summarize(args.start_date, args.end_date)
+    if args.csv:
+        dump_csv(args.start_date, args.end_date)
+    else:
+        summarize(args.start_date, args.end_date)
