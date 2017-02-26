@@ -45,6 +45,9 @@ class TimeEvent:
     def __repr__(self):
         return str(self)
 
+    def date(self):
+        return self.id.date()
+
 class TimeTask:
     def __init__(self, startEvent, endEvent):
         self.startTime = utc_to_local(startEvent.id)
@@ -70,8 +73,9 @@ class TimeTask:
         end = self.endTime.strftime('%H:%M')
         return '{1} {2} -- {3} ({4:.1f}h): {0.description} {0.tags}'.format(self, date, start, end, self.hours())
 
-def generate_time_tasks(data):
+def generate_time_tasks(data, startDate, endDate):
     events = [TimeEvent(x) for x in data if 'status' in x]
+    events = [x for x in events if x.date() >= startDate and x.date() <= endDate]
     #print('Sorting %s events...' % len(events))
     events.sort(key=lambda x:x.id)
     #print('Done sorting')
@@ -79,13 +83,13 @@ def generate_time_tasks(data):
         if e1.status == 'in':
             yield TimeTask(e1, e2)
 
-def get_and_parse():
+def get_and_parse(startDate, endDate):
     #print(get_json_data())
-    return list(generate_time_tasks(get_json_data()))
+    return list(generate_time_tasks(get_json_data(), startDate, endDate))
     #return [TimeEvent(x) for x in get_json_data()]
 
 def summarize(startDate, endDate):
-    tasks = get_and_parse()
+    tasks = get_and_parse(startDate, endDate)
     if tasks:
         date = tasks[0].date()
     else:
@@ -98,11 +102,6 @@ def summarize(startDate, endDate):
         print('Total hours: {0:.1f} :: {1}'.format(day_hours, breakdown))
         print('')
     for task in tasks:
-        if task.date() > endDate:
-            break
-        if task.date() < startDate:
-            date = task.date()
-            continue
         if task.date() != date:
             print_total()
             day_hours = 0.0
