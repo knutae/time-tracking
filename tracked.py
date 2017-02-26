@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import os, json, datetime
 from http.client import HTTPSConnection
 from collections import defaultdict
@@ -37,7 +38,7 @@ class TimeEvent:
         self.id = parse_iso_8601_utc_time(data['_id'])
         self.description = data.get('description')
         self.tags = data.get('tags', [])
-    
+
     def __str__(self):
         return 'TimeEvent({0.status}, {0.id}, "{0.description}", {0.tags})'.format(self)
 
@@ -56,13 +57,13 @@ class TimeTask:
 
     def __repr__(self):
         return str(self)
-    
+
     def date(self):
         return self.startTime.date()
-    
+
     def hours(self):
         return (self.endTime - self.startTime).total_seconds() / 3600.0
-    
+
     def summary(self):
         date = self.date().strftime('%Y-%m-%d')
         start = self.startTime.strftime('%H:%M')
@@ -83,7 +84,7 @@ def get_and_parse():
     return list(generate_time_tasks(get_json_data()))
     #return [TimeEvent(x) for x in get_json_data()]
 
-def summarize(startDate):
+def summarize(startDate, endDate):
     tasks = get_and_parse()
     if tasks:
         date = tasks[0].date()
@@ -97,6 +98,8 @@ def summarize(startDate):
         print('Total hours: {0:.1f} :: {1}'.format(day_hours, breakdown))
         print('')
     for task in tasks:
+        if task.date() > endDate:
+            break
         if task.date() < startDate:
             date = task.date()
             continue
@@ -110,6 +113,18 @@ def summarize(startDate):
         date = task.date()
     print_total()
 
+def valid_date(s):
+    try:
+        return datetime.datetime.strptime(s, "%Y-%m-%d").date()
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
+
 if __name__ == '__main__':
-    startDate = datetime.date(2015, 1, 1)
-    summarize(startDate)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start-date', '-s', type=valid_date, default='2017-01-01')
+    parser.add_argument('--end-date', '-e', type=valid_date, default='2018-01-01')
+    args = parser.parse_args()
+    print(args)
+    #startDate = datetime.date(2017, 1, 1)
+    summarize(args.start_date, args.end_date)
